@@ -2,25 +2,37 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>Data Streams</title>
     <style media="screen" type="text/css">
       #div_g { position: absolute; left: 200px; right: 50px; top: 100px; bottom: 50px; }
     </style>
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <h1><u>Data Streams</u></h1>
     <!-- All of the Node.js APIs are available in this renderer process. -->
     We are using node <script>document.write(process.versions.node)</script>,
     Chromium <script>document.write(process.versions.chrome)</script>,
     and Electron <script>document.write(process.versions.electron)</script>.
-    <h2>Testing stuff here</h2>
-    <div id="data">nothing</div>
-    <div id="div_g" ></div>
+    <h2>Graph</h2>
+    <div id="data">Graph Loading...</div>
+    <div id="div_g"></div>
+	<div id="Stream1"><u>Stream 1</u></div>
+	<div id="Stream2"><u>Stream 2</u></div>
+	<div id="Stream3"><u>Stream 3</u></div>
   </body>
 
   <script>window.$ = window.jQuery = require('jquery');</script>
   <script>
     // You can also require other files to run in this process
     require('./js/projector.js')
+	$("#Stream1").click(function(){
+		toStream(0)
+		});
+	$("#Stream2").click(function(){
+		toStream(1)
+		});
+	$("#Stream3").click(function(){
+		toStream(2)
+		});
   </script>
 </html>

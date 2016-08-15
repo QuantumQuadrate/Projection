@@ -10,7 +10,7 @@ $(document).ready(function(){
   var g;
   var now = Date.now();
   var then = now - 1000*60*10;
-  var buffer = []
+  var buffer = [];
 
   // pad with zeros
   function pad(n, width, z){
@@ -38,7 +38,7 @@ $(document).ready(function(){
     var info_url = 'tcp://' + conn.server.toString() + ':' + conn.info_port.toString();
     console.log('Server at: ', info_url);
     conn.info_socket.connect(info_url);
-    conn.info_socket.send("HELP");
+    conn.info_socket.send("MESSAGE RECIEVED");
 
     // ready subscription
     var x=0;
@@ -74,9 +74,9 @@ $(document).ready(function(){
       g = new dyg(document.getElementById("div_g"), gdata, {
         rollPeriod: 0, 
         legend: 'always',
-        title: 'whatever',
+        title: 'Title',
         labels: labels,
-        ylabel: 'who cares',
+        ylabel: 'Y axis',
         xlabel: 'Time (HH:MM:SS)',
         errorBars: true,
         strokeWidth: 4,
@@ -136,6 +136,35 @@ $(document).ready(function(){
     }
     setTimeout(arguments.callee, 5000);
   }
+$(function(){
+	function toStream(id){
+		displayID = id + 1;
+		alert("Starting Stream " + displayID + ".");
+    	console.log("Unsubscribing from data socket with filter ["+ sub_filter +"]");
+	conn.data_socket.unsubscribe(sub_filter);
 
+//clear variables, set new ID
+		//buffer = [];
+		labels = ["time"];		
+		gdata = [];
+		g.updateOptions({'file':gdata,
+		'dateWindow':[then,now]} );
+		streamID = id;
+
+    sub_filter = pad(streamID, 4, '0');
+    console.log("Subscribing to data server with filter ["+ sub_filter +"]");
+    var data_url = 'tcp://' + conn.server.toString() + ':' + conn.data_port.toString();
+    console.log('Server at: ', data_url);
+    conn.data_socket.connect(data_url);
+    conn.data_socket.subscribe(sub_filter);
+	buffer = [];
+	g.destroy();
+
+		connectToServer(conn);
+		waitForResponse();
+		updateGraph();
+}
+window.toStream=toStream;
+});
   updateGraph();
 });
