@@ -16,7 +16,7 @@ $(document).ready(function(){
   function pad(n, width, z){
     z = z || '0';
     n = n + '';
-    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    return Array(width - n.length + 1).join(z) + n;
   }
 
   function connectToServer(conn){
@@ -31,8 +31,10 @@ $(document).ready(function(){
       for ( var key in knownStreamVersions ){
         if ( knownStreamVersions[key].id == streamID ){
           labels = labels.concat(knownStreamVersions[key].keyOrder);
+	  console.log("There are " + knownStreamVersions[key].keyOrder.length + " labels.");
         }
       }
+
       conn.info_socket.close();
     });
     var info_url = 'tcp://' + conn.server.toString() + ':' + conn.info_port.toString();
@@ -49,12 +51,14 @@ $(document).ready(function(){
       buffer.push(msg);
     });
 
-    sub_filter = pad(streamID, 4, '0');
+setTimeout(function(){
+	sub_filter = pad(streamID, 4, '0');
     console.log("Subscribing to data server with filter ["+ sub_filter +"]");
     var data_url = 'tcp://' + conn.server.toString() + ':' + conn.data_port.toString();
     console.log('Server at: ', data_url);
     conn.data_socket.connect(data_url);
     conn.data_socket.subscribe(sub_filter);
+}, 250);
 
     process.on('SIGINT', function() {
       console.log('Shutting down connections');
@@ -101,7 +105,7 @@ $(document).ready(function(){
 
   function updateGraph(){
     if( labels.length > 1 ){
-      console.log(buffer.length);
+      console.log("Buffer length is " + buffer.length + ".");
       if( buffer.length > 0 ){
         temp = buffer;
         buffer = [];
@@ -127,12 +131,14 @@ $(document).ready(function(){
           newData[j][1] = Math.sqrt(newData[j][1]);
         }
 
+	console.log("DATA LENGTH = " + newData.length);
         console.log(newData);
         newData[0] = new Date(newData[0]*1000); // javascript is in ms because someone is a dipshit
         console.log(newData);
-      }
       gdata.push(newData);
-      g.updateOptions( {"file": gdata} ); //, "dateWindow": [then, now]} );
+      g.updateOptions( {"file": gdata} );
+      }
+ //, "dateWindow": [then, now]} );
     }
     setTimeout(arguments.callee, 5000);
   }
@@ -142,27 +148,18 @@ $(function(){
 		alert("Starting Stream " + displayID + ".");
     	console.log("Unsubscribing from data socket with filter ["+ sub_filter +"]");
 	conn.data_socket.unsubscribe(sub_filter);
-
-//clear variables, set new ID
-		//buffer = [];
-		labels = ["time"];		
+g.destroy();
+    //clear variables, set new ID
 		gdata = [];
-		g.updateOptions({'file':gdata,
-		'dateWindow':[then,now]} );
+		buffer = [];
+		labels = ["time"];
 		streamID = id;
 
-    sub_filter = pad(streamID, 4, '0');
-    console.log("Subscribing to data server with filter ["+ sub_filter +"]");
-    var data_url = 'tcp://' + conn.server.toString() + ':' + conn.data_port.toString();
-    console.log('Server at: ', data_url);
-    conn.data_socket.connect(data_url);
-    conn.data_socket.subscribe(sub_filter);
-	buffer = [];
-	g.destroy();
-
 		connectToServer(conn);
+
 		waitForResponse();
 		updateGraph();
+
 }
 window.toStream=toStream;
 });
